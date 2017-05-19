@@ -1,7 +1,9 @@
 package com.pidgeon.api;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
@@ -9,19 +11,21 @@ import java.io.PrintWriter;
 
 @RestController
 public class SMSController {
+  @Value("${pidgeon.path}")
+  private String path;
 
-  @RequestMapping("/send")
-  public SMSResponse send(@RequestParam(value = "name", defaultValue = "") String name) {
-    try{
-      PrintWriter writer = new PrintWriter("/Users/sarbull/work/sms/the-file-name.txt", "UTF-8");
-      writer.println("The first line");
-      writer.println("The second line");
+  @RequestMapping(value = "/send", method = RequestMethod.POST)
+  public SMSModel send(@RequestBody SMSModel smsModel) {
+    try {
+      String fullPath = path + smsModel.getRecipient() + ".txt";
+      String csn      = "UTF-8";
+
+      PrintWriter writer = new PrintWriter(fullPath, csn);
+      writer.println("To: " + smsModel.getRecipient());
+      writer.println(smsModel.getMessage());
       writer.close();
-    } catch (IOException e) {
-      // do something
-    }
+    } catch (IOException e) {}
 
-
-    return new SMSResponse("0727686700", "Hello from Spring Boot");
+    return smsModel;
   }
 }
